@@ -34,4 +34,4 @@ This document outlines the strategy for refactoring the SecureSnitch host-based 
 *   [x] **Task 6.2:** Implement Process Tree Lineage (PPID Chain Tracking).
 *   [x] **Task 6.3:** Implement DNS-over-HTTPS (DoH) / DNS-over-TLS (DoT) Proxy.
 *   [x] **Task 6.4:** Implement Kernel-Level Self-Defense (eBPF LSM Hooks).
-*   [ ] **Task 6.5:** Implement Privilege Dropping (Linux Capabilities).
+*   [x] **Task 6.5:** Implement Privilege Dropping (Linux Capabilities).

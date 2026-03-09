@@ -9,6 +9,7 @@ mod backend;
 mod hashing;
 mod rules_engine;
 mod dns_proxy;
+mod privileges;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -58,6 +59,9 @@ async fn main() -> anyhow::Result<()> {
         if let Err(e) = nfq::start_nfq_listener() {
             eprintln!("NFQ listener error: {}", e);
         }
+
+        // Drop privileges after all root-only setup is complete
+        privileges::drop_privileges()?;
     }
 
     println!("Process Monitoring and Security Modules ready.");
