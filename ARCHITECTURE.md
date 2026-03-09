@@ -14,7 +14,7 @@ The "Brain" of the firewall. It runs with elevated privileges to interact with t
 
 ### 2. The SecureSnitch UI (`ui/`)
 A native, cross-platform dashboard built with the **Iced** framework.
-- **gRPC Client:** Communicates with the daemon via an encrypted gRPC channel over Unix Domain Sockets.
+- **gRPC Client:** Communicates with the daemon via an encrypted, **mTLS-authenticated** gRPC channel.
 - **Rule Manager:** Interfaces with the **SQLCipher** encrypted SQLite database.
 - **Sysbar Gadget:** A background-resident system tray icon for real-time notifications.
 
