@@ -47,6 +47,13 @@ async fn main() -> anyhow::Result<()> {
             Err(e) => eprintln!("Warning: Could not load eBPF module (ensure you are root and the file exists): {}", e),
         }
 
+        // Load Self-Defense eBPF module
+        let self_defense_path = "/etc/securesnitch/self_defense.o";
+        match ebpf::load_ebpf_module(self_defense_path) {
+            Ok(_obj) => println!("Kernel self-defense module active."),
+            Err(_) => println!("Warning: Kernel LSM self-defense not supported on this kernel."),
+        }
+
         // Phase 2: NFQ listener
         if let Err(e) = nfq::start_nfq_listener() {
             eprintln!("NFQ listener error: {}", e);
