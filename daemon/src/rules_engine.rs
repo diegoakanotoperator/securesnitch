@@ -109,6 +109,7 @@ fn get_operand_value(operand: &str, conn: &Connection) -> String {
         "user.id" => conn.user_id.to_string(),
         "protocol" => conn.protocol.clone(),
         "process.hash.sha256" => conn.process_checksums.get("sha256").cloned().unwrap_or_default(),
+        "process.parent.path" => conn.process_tree.first().map(|ti| ti.key.clone()).unwrap_or_default(),
         _ => String::new(),
     }
 }
