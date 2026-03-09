@@ -28,6 +28,7 @@ package = "securesnitch-ui"
 anyhow = "1.0.102"
 iced = "0.14.0"
 prost = "0.13.5"
+rustls = { version = "0.23", default-features = false, features = ["ring"] }
 sqlx = { version = "0.8.6", features = ["sqlite", "runtime-tokio"] }
 tokio = "1.50.0"
 tonic = { version = "0.12.3", features = ["tls", "tls-roots"] }
