@@ -19,16 +19,16 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            artifact_name: daemon-linux-x86_64
+            artifact_name: securesnitch-linux-x86_64
           - os: macos-latest
             target: x86_64-apple-darwin
-            artifact_name: daemon-macos-x86_64
+            artifact_name: securesnitch-macos-x86_64
           - os: macos-latest
             target: aarch64-apple-darwin
-            artifact_name: daemon-macos-arm64
+            artifact_name: securesnitch-macos-arm64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact_name: daemon-windows-x86_64.exe
+            artifact_name: securesnitch-windows-x86_64
 
     steps:
       - uses: actions/checkout@v4
@@ -40,15 +40,19 @@ jobs:
 
       - name: Install Dependencies (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install -y libdbus-1-dev libgtk-3-dev pkg-config upx
+        run: sudo apt-get update && sudo apt-get install -y libdbus-1-dev libgtk-3-dev pkg-config upx protobuf-compiler
 
       - name: Install Dependencies (macOS)
         if: matrix.os == 'macos-latest'
-        run: brew install upx
+        run: |
+          brew install upx protobuf
+          echo "PROTOC=$(brew --prefix protobuf)/bin/protoc" >> $GITHUB_ENV
 
       - name: Install Dependencies (Windows)
         if: matrix.os == 'windows-latest'
-        run: choco install upx
+        run: |
+          choco install upx protoc
+          echo "PROTOC=protoc" >> $GITHUB_ENV
 
       - name: Build Release
         run: cargo build --release --target ${{ matrix.target }}
@@ -56,14 +60,23 @@ jobs:
       - name: Pack Binaries with UPX (Anti-Disassembly)
         shell: bash
         run: |
-          BINARY_PATH="target/${{ matrix.target }}/release/${{ contains(matrix.artifact_name, '.exe') && 'daemon.exe' || 'daemon' }}"
-          upx --ultra-brute "$BINARY_PATH" || echo "UPX failed or not needed, continuing..."
+          DAEMON_BINARY="target/${{ matrix.target }}/release/${{ matrix.os == 'windows-latest' && 'daemon.exe' || 'daemon' }}"
+          UI_BINARY="target/${{ matrix.target }}/release/${{ matrix.os == 'windows-latest' && 'ui.exe' || 'ui' }}"
+          
+          # Rename for clarity in release
+          mv "$DAEMON_BINARY" "target/${{ matrix.target }}/release/securesnitch-daemon${{ matrix.os == 'windows-latest' && '.exe' || '' }}"
+          mv "$UI_BINARY" "target/${{ matrix.target }}/release/securesnitch-ui${{ matrix.os == 'windows-latest' && '.exe' || '' }}"
+          
+          upx --ultra-brute "target/${{ matrix.target }}/release/securesnitch-daemon${{ matrix.os == 'windows-latest' && '.exe' || '' }}" || echo "UPX failed for daemon"
+          upx --ultra-brute "target/${{ matrix.target }}/release/securesnitch-ui${{ matrix.os == 'windows-latest' && '.exe' || '' }}" || echo "UPX failed for UI"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: target/${{ matrix.target }}/release/${{ contains(matrix.artifact_name, '.exe') && 'daemon.exe' || 'daemon' }}
+          path: |
+            target/${{ matrix.target }}/release/securesnitch-daemon${{ matrix.os == 'windows-latest' && '.exe' || '' }}
+            target/${{ matrix.target }}/release/securesnitch-ui${{ matrix.os == 'windows-latest' && '.exe' || '' }}
 
   release:
     name: Create Release
@@ -77,8 +90,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            daemon-linux-x86_64/daemon
-            daemon-macos-x86_64/daemon
-            daemon-macos-arm64/daemon
-            daemon-windows-x86_64.exe/daemon.exe
+            securesnitch-linux-x86_64/*
+            securesnitch-macos-x86_64/*
+            securesnitch-macos-arm64/*
+            securesnitch-windows-x86_64/*
           generate_release_notes: true
