@@ -1,0 +1,84 @@
+name: SecureSnitch CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: daemon-linux-x86_64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: daemon-macos-x86_64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: daemon-macos-arm64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: daemon-windows-x86_64.exe
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install Dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y libdbus-1-dev libgtk-3-dev pkg-config upx
+
+      - name: Install Dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install upx
+
+      - name: Install Dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: choco install upx
+
+      - name: Build Release
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Pack Binaries with UPX (Anti-Disassembly)
+        shell: bash
+        run: |
+          BINARY_PATH="target/${{ matrix.target }}/release/${{ contains(matrix.artifact_name, '.exe') && 'daemon.exe' || 'daemon' }}"
+          upx --ultra-brute "$BINARY_PATH" || echo "UPX failed or not needed, continuing..."
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: target/${{ matrix.target }}/release/${{ contains(matrix.artifact_name, '.exe') && 'daemon.exe' || 'daemon' }}
+
+  release:
+    name: Create Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            daemon-linux-x86_64/daemon
+            daemon-macos-x86_64/daemon
+            daemon-macos-arm64/daemon
+            daemon-windows-x86_64.exe/daemon.exe
+          generate_release_notes: true
