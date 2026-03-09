@@ -1,8 +1,10 @@
+#[cfg(target_os = "linux")]
 pub struct Firewall {
     #[allow(dead_code)]
     ipt: iptables::IPTables,
 }
 
+#[cfg(target_os = "linux")]
 impl Firewall {
     pub fn new() -> anyhow::Result<Self> {
         let ipt = iptables::new(false).map_err(|e| anyhow::anyhow!("IPTables error: {}", e))?;

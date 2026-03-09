@@ -1,6 +1,9 @@
+#[cfg(target_os = "linux")]
 mod ebpf;
+#[cfg(target_os = "linux")]
 mod nfq;
 mod procfs;
+#[cfg(target_os = "linux")]
 mod firewall;
 mod litebox;
 mod ipc;
@@ -9,6 +12,7 @@ mod backend;
 mod hashing;
 mod rules_engine;
 mod dns_proxy;
+#[cfg(target_os = "linux")]
 mod privileges;
 mod service;
 
