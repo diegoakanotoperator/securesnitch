@@ -1,0 +1,17 @@
+[Unit]
+Description=SecureSnitch Rust Daemon
+DefaultDependencies=no
+After=local-fs.target
+Before=network.target
+Conflicts=shutdown.target
+
+[Service]
+Type=simple
+ExecStartPre=/usr/sbin/iptables -A OUTPUT -j NFQUEUE --queue-num 0
+ExecStart=/usr/bin/securesnitch-daemon
+Restart=always
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_SYS_ADMIN CAP_BPF
+AmbientCapabilities=CAP_NET_ADMIN CAP_SYS_ADMIN CAP_BPF
+
+[Install]
+WantedBy=multi-user.target

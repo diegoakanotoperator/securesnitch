@@ -1,0 +1,21 @@
+app-id: io.github.diegoakanotoperator.securesnitch
+runtime: org.gnome.Platform
+runtime-version: '45'
+sdk: org.gnome.Sdk
+command: securesnitch-ui
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri
+  - --system-talk-name=org.freedesktop.Notifications
+modules:
+  - name: securesnitch
+    buildsystem: simple
+    build-commands:
+      - install -D securesnitch-ui /app/bin/securesnitch-ui
+    sources:
+      - type: file
+        path: target/release/ui
+        dest-filename: securesnitch-ui

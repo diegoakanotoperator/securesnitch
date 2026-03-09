@@ -10,11 +10,19 @@ mod hashing;
 mod rules_engine;
 mod dns_proxy;
 mod privileges;
+mod service;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     println!("SecureSnitch Rust Daemon v1.0.0 started.");
     
+    // Start gRPC IPC Server
+    tokio::spawn(async move {
+        if let Err(e) = ipc::start_grpc_server("127.0.0.1:50051").await {
+            eprintln!("gRPC Server Error: {}", e);
+        }
+    });
+
     // Start DNS-over-HTTPS Proxy
     tokio::spawn(async move {
         if let Err(e) = dns_proxy::start_dns_proxy("127.0.0.1:5353").await {
@@ -32,12 +40,6 @@ async fn main() -> anyhow::Result<()> {
     // Phase 3: Litebox Enclave & Security
     let enclave = litebox::Enclave::new();
     enclave.protect_memory();
-    
-    tokio::spawn(async move {
-        if let Err(e) = ipc::start_grpc_ipc().await {
-            eprintln!("IPC Error: {}", e);
-        }
-    });
     
     // Linux-Specific Phase 1: eBPF
     #[cfg(target_os = "linux")]

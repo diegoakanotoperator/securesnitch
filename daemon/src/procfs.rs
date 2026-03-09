@@ -1,6 +1,7 @@
 use sysinfo::{System, Pid};
 use crate::hashing;
 
+#[allow(dead_code)]
 pub struct ProcessInfo {
     pub pid: u32,
     pub ppid: u32,
@@ -12,6 +13,7 @@ pub struct ProcessInfo {
     pub parent_path: Option<String>,
 }
 
+#[allow(dead_code)]
 pub fn get_process_info(pid: u32) -> Option<ProcessInfo> {
     let mut sys = System::new_all();
     sys.refresh_all();

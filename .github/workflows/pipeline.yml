@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    name: Build and Release
+    name: Build and Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -54,14 +54,18 @@ jobs:
           choco install upx protoc
           echo "PROTOC=protoc" >> $GITHUB_ENV
 
+      - name: Run Tests
+        run: cargo test --release --target ${{ matrix.target }}
+
       - name: Build Release
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Pack Binaries with UPX (Anti-Disassembly)
         shell: bash
         run: |
-          DAEMON_BINARY="target/${{ matrix.target }}/release/${{ matrix.os == 'windows-latest' && 'daemon.exe' || 'daemon' }}"
-          UI_BINARY="target/${{ matrix.target }}/release/${{ matrix.os == 'windows-latest' && 'ui.exe' || 'ui' }}"
+          # Use target-specific paths
+          DAEMON_BINARY="target/${{ matrix.target }}/release/daemon${{ matrix.os == 'windows-latest' && '.exe' || '' }}"
+          UI_BINARY="target/${{ matrix.target }}/release/ui${{ matrix.os == 'windows-latest' && '.exe' || '' }}"
           
           # Rename for clarity in release
           mv "$DAEMON_BINARY" "target/${{ matrix.target }}/release/securesnitch-daemon${{ matrix.os == 'windows-latest' && '.exe' || '' }}"
@@ -78,10 +82,50 @@ jobs:
             target/${{ matrix.target }}/release/securesnitch-daemon${{ matrix.os == 'windows-latest' && '.exe' || '' }}
             target/${{ matrix.target }}/release/securesnitch-ui${{ matrix.os == 'windows-latest' && '.exe' || '' }}
 
+  package-linux:
+    name: Package Linux (DEB, RPM)
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: securesnitch-linux-x86_64
+          path: target/release/
+      
+      - name: Rename binaries back for packaging tools
+        run: |
+          mv target/release/securesnitch-daemon target/release/daemon
+          mv target/release/securesnitch-ui target/release/ui
+
+      - name: Install Packaging Tools
+        run: |
+          cargo install cargo-deb cargo-generate-rpm
+          sudo apt-get update && sudo apt-get install -y rpm
+      
+      - name: Build DEB (Daemon)
+        run: cd daemon && cargo deb --no-build
+      - name: Build DEB (UI)
+        run: cd ui && cargo deb --no-build
+      
+      - name: Build RPM (Daemon)
+        run: cd daemon && cargo generate-rpm --no-build
+      - name: Build RPM (UI)
+        run: cd ui && cargo generate-rpm --no-build
+
+      - name: Upload Linux Packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            target/debian/*.deb
+            target/generate-rpm/*.rpm
+
   release:
     name: Create Release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    needs: [build, package-linux]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -94,4 +138,6 @@ jobs:
             securesnitch-macos-x86_64/*
             securesnitch-macos-arm64/*
             securesnitch-windows-x86_64/*
+            linux-packages/*.deb
+            linux-packages/*.rpm
           generate_release_notes: true

@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub trait FirewallBackend {
     fn initialize(&self) -> anyhow::Result<()>;
     fn block_ip(&self, ip: &str) -> anyhow::Result<()>;
@@ -9,6 +10,7 @@ mod linux_backend {
     use crate::firewall::Firewall;
 
     pub struct LinuxFirewall {
+        #[allow(dead_code)]
         inner: Firewall,
     }
 
@@ -64,3 +66,7 @@ pub fn get_backend() -> anyhow::Result<Box<dyn FirewallBackend>> {
         Ok(Box::new(stub_backend::StubFirewall::new()?))
     }
 }
+
+#[cfg(test)]
+#[path = "backend_test.rs"]
+mod tests;

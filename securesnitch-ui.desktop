@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=SecureSnitch
+Comment=SecureSnitch Application Firewall
+Exec=securesnitch-ui
+Icon=securesnitch
+Terminal=false
+Type=Application
+Categories=Network;Security;
+StartupNotify=true

@@ -3,6 +3,26 @@ name = "daemon"
 version = "1.0.0"
 edition = "2024"
 
+[package.metadata.deb]
+name = "securesnitch"
+maintainer = "Diego <diego@localhost>"
+copyright = "2026, Diego"
+license-file = ["../LICENSE", "4"]
+depends = "$auto, iptables"
+section = "net"
+priority = "optional"
+assets = [
+    ["target/release/daemon", "/usr/bin/securesnitch-daemon", "755"],
+    ["../securesnitch-daemon.service", "/lib/systemd/system/securesnitch-daemon.service", "644"],
+]
+
+[package.metadata.rpm]
+package = "securesnitch"
+
+[package.metadata.rpm.files]
+"/usr/bin/securesnitch-daemon" = { mode = "755", source = "target/release/daemon" }
+"/lib/systemd/system/securesnitch-daemon.service" = { mode = "644", source = "../securesnitch-daemon.service" }
+
 [dependencies]
 anyhow = "1.0.102"
 aya = { version = "0.13.1", features = ["async_tokio"] }
@@ -11,7 +31,6 @@ ipnet = "2.12.0"
 iptables = "0.6.0"
 log = "0.4.29"
 nfq = "0.2.5"
-procfs = "0.18.0"
 prost = "0.13.5"
 regex = "1.12.3"
 reqwest = { version = "0.13.2", features = ["json"] }

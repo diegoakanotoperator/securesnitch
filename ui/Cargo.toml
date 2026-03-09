@@ -3,6 +3,26 @@ name = "ui"
 version = "1.0.0"
 edition = "2024"
 
+[package.metadata.deb]
+name = "securesnitch-ui"
+maintainer = "Diego <diego@localhost>"
+copyright = "2026, Diego"
+license-file = ["../LICENSE", "4"]
+depends = "$auto, libdbus-1-3, libgtk-3-0"
+section = "net"
+priority = "optional"
+assets = [
+    ["target/release/ui", "/usr/bin/securesnitch-ui", "755"],
+    ["../securesnitch-ui.desktop", "/usr/share/applications/securesnitch-ui.desktop", "644"],
+]
+
+[package.metadata.rpm]
+package = "securesnitch-ui"
+
+[package.metadata.rpm.files]
+"/usr/bin/securesnitch-ui" = { mode = "755", source = "target/release/ui" }
+"/usr/share/applications/securesnitch-ui.desktop" = { mode = "644", source = "../securesnitch-ui.desktop" }
+
 [dependencies]
 anyhow = "1.0.102"
 iced = "0.14.0"
