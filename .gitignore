@@ -1,3 +1,16 @@
-*.sock
-*.pyc
-*.profile
+# Rust
+/target
+/Cargo.lock
+
+# Gemini CLI
+.gemini/
+.geminiignore
+GEMINI.md
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
