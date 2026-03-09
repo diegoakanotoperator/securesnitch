@@ -2,7 +2,7 @@
 mod ebpf;
 #[cfg(target_os = "linux")]
 mod nfq;
-mod procfs;
+mod process;
 #[cfg(target_os = "linux")]
 mod firewall;
 mod litebox;

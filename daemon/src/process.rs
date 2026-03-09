@@ -19,7 +19,10 @@ pub fn get_process_info(pid: u32) -> Option<ProcessInfo> {
     sys.refresh_all();
 
     // Use a more portable Pid creation for sysinfo 0.30
-    let pid_sys = Pid::from(pid as usize);
+    #[cfg(not(windows))]
+    let pid_sys = pid as Pid;
+    #[cfg(windows)]
+    let pid_sys = pid as usize;
     
     if let Some(process) = sys.process(pid_sys) {
         let path = process.exe().to_string_lossy().into_owned();
