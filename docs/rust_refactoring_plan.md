@@ -32,6 +32,6 @@ This document outlines the strategy for refactoring the SecureSnitch host-based 
 ### Phase 6: Advanced Security & Hardening
 *   [x] **Task 6.1:** Implement Binary Integrity Verification (SHA-256 Checksumming).
 *   [x] **Task 6.2:** Implement Process Tree Lineage (PPID Chain Tracking).
-*   [ ] **Task 6.3:** Implement DNS-over-HTTPS (DoH) / DNS-over-TLS (DoT) Proxy.
+*   [x] **Task 6.3:** Implement DNS-over-HTTPS (DoH) / DNS-over-TLS (DoT) Proxy.
 *   [ ] **Task 6.4:** Implement Kernel-Level Self-Defense (eBPF LSM Hooks).
 *   [ ] **Task 6.5:** Implement Privilege Dropping (Linux Capabilities).

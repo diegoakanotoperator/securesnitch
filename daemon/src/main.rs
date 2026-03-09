@@ -8,11 +8,19 @@ mod dns;
 mod backend;
 mod hashing;
 mod rules_engine;
+mod dns_proxy;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     println!("SecureSnitch Rust Daemon v1.0.0 started.");
     
+    // Start DNS-over-HTTPS Proxy
+    tokio::spawn(async move {
+        if let Err(e) = dns_proxy::start_dns_proxy("127.0.0.1:5353").await {
+            eprintln!("DNS Proxy Error: {}", e);
+        }
+    });
+
     // Cross-platform backend initialization
     let backend = backend::get_backend()?;
     backend.initialize()?;
