@@ -12,15 +12,16 @@ iptables = "0.6.0"
 log = "0.4.29"
 nfq = "0.2.5"
 procfs = "0.18.0"
-prost = "0.14.3"
+prost = "0.13.5"
 regex = "1.12.3"
 reqwest = { version = "0.13.2", features = ["json"] }
 sha2 = "0.10.9"
 sysinfo = "0.38.4"
 tokio = { version = "1.50.0", features = ["full"] }
 tokio-stream = "0.1.18"
-tonic = "0.14.5"
+tonic = "0.12.3"
 trust-dns-proto = "0.23.2"
 
 [build-dependencies]
-tonic-build = "0.14.5"
+prost-build = "0.14.3"
+tonic_build = { version = "0.12.3", package = "tonic-build", features = ["transport"] }

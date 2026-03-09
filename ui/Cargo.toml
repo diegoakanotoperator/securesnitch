@@ -6,11 +6,11 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.102"
 iced = "0.14.0"
-prost = "0.14.3"
+prost = "0.13.5"
 sqlx = { version = "0.8.6", features = ["sqlite", "runtime-tokio"] }
 tokio = "1.50.0"
-tonic = "0.14.5"
+tonic = "0.12.3"
 tray-icon = "0.21.3"
 
 [build-dependencies]
-tonic-build = "0.14.5"
+tonic-build = { version = "0.12.3", features = ["transport"] }
