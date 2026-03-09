@@ -14,7 +14,7 @@ mod service;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    println!("SecureSnitch Rust Daemon v1.0.0 started.");
+    println!("SecureSnitch Rust Daemon v1.0.1 started.");
     
     // Start gRPC IPC Server
     tokio::spawn(async move {

@@ -1,6 +1,7 @@
 [package]
 name = "ui"
-version = "1.0.0"
+version = "1.0.1"
+authors = ["diegoakanotoperator"]
 edition = "2024"
 
 [package.metadata.deb]
