@@ -25,3 +25,6 @@ trust-dns-proto = "0.23.2"
 [build-dependencies]
 prost-build = "0.14.3"
 tonic_build = { version = "0.12.3", package = "tonic-build", features = ["transport"] }
+
+[dev-dependencies]
+tempfile = "3.26.0"

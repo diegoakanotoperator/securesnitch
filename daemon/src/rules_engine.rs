@@ -119,16 +119,34 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_simple_match() {
+    fn test_hash_match() {
+        let mut checksums = std::collections::HashMap::new();
+        checksums.insert("sha256".to_string(), "abc123def".to_string());
+        
         let conn = Connection {
-            process_path: "/usr/bin/curl".to_string(),
+            process_checksums: checksums,
             ..Default::default()
         };
         let op = Operator {
             r#type: "simple".to_string(),
-            operand: "process.path".to_string(),
-            data: "/usr/bin/curl".to_string(),
-            sensitive: false,
+            operand: "process.hash.sha256".to_string(),
+            data: "abc123def".to_string(),
+            ..Default::default()
+        };
+        assert!(match_simple(&op, &conn));
+    }
+
+    #[test]
+    fn test_parent_path_match() {
+        use protocol::StringInt;
+        let conn = Connection {
+            process_tree: vec![StringInt { key: "/usr/bin/bash".to_string(), ..Default::default() }],
+            ..Default::default()
+        };
+        let op = Operator {
+            r#type: "simple".to_string(),
+            operand: "process.parent.path".to_string(),
+            data: "/usr/bin/bash".to_string(),
             ..Default::default()
         };
         assert!(match_simple(&op, &conn));

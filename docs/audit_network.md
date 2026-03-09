@@ -14,4 +14,4 @@ The codebase was searched for hardcoded IP addresses, domains, and suspicious ne
 - **Data Exfiltration:** No logic was found that sends connection logs or system data to external third-party servers.
 
 ### Conclusion
-OpenSnitch operates as a local firewall and does not appear to perform unauthorized data exfiltration or phone-home activity.
+SecureSnitch operates as a local firewall and does not appear to perform unauthorized data exfiltration or phone-home activity.

@@ -15,8 +15,8 @@ To prevent applications from sending data before the daemon has finished loading
 ## 3. Auto-Registration Logic
 On installation, the following steps are performed:
 1.  The daemon binary is placed in `/usr/local/bin/`.
-2.  The `opensnitch.service` unit is copied to `/etc/systemd/system/`.
-3.  The service is enabled: `systemctl enable opensnitch`.
+2.  The `securesnitch.service` unit is copied to `/etc/systemd/system/`.
+3.  The service is enabled: `systemctl enable securesnitch`.
 
 ## 4. Security Verification
 During a boot-time audit:

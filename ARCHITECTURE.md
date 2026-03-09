@@ -1,37 +1,34 @@
-# SecureSnitch Rust Architecture
+# 🏗️ SecureSnitch Architecture
 
-## Overview
-The SecureSnitch Rust implementation follows a multi-process architecture designed for high performance, memory safety, and anti-tampering security.
+## System Overview
+SecureSnitch employs a high-integrity, multi-process architecture consisting of a privileged system daemon and a user-space graphical interface.
 
-## Components
+## ⚙️ Core Components
 
-### 1. eBPF Kernel Modules (`ebpf_prog/`)
-*   **Role:** High-performance event capture within the Linux kernel.
-*   **Hooks:** `execve`, `execveat`, and socket lifecycle events.
-*   **Rust Integration:** The `daemon` crate uses the `aya` library to load and interact with these programs without requiring `libelf` or other system C dependencies.
+### 1. The SecureSnitch Daemon (`daemon/`)
+The "Brain" of the firewall. It runs with elevated privileges to interact with the kernel.
+- **Event Processor:** Uses **eBPF** (`aya`) to track process execution and lifecycle events.
+- **Network Interceptor:** Uses **NFQUEUE** (`nfq`) to pause outbound packets until a policy decision is made.
+- **Security Enclave:** Uses **Litebox** patterns to isolate the rules engine in a memory-guarded space.
+- **Privilege Manager:** Drops all unnecessary root capabilities after initialization, retaining only `CAP_NET_ADMIN` and `CAP_BPF`.
 
-### 2. SecureSnitch Daemon (`daemon/`)
-*   **Role:** The core engine that processes kernel events and enforces firewall policies.
-*   **Netfilter Queue (NFQ):** Intercepts network packets and holds them until a verdict (Allow/Deny) is reached.
-*   **Rules Engine:** Evaluates intercepted events against the user-defined policy stored in the encrypted SQLite database.
-*   **Litebox Enclave:** Protects the memory space of the rules engine and policy decision logic from external tampering and process injection.
-*   **Procfs Monitoring:** Tracks the process tree and identifies the specific PID/Inode associated with network connections.
+### 2. The SecureSnitch UI (`ui/`)
+A native, cross-platform dashboard built with the **Iced** framework.
+- **gRPC Client:** Communicates with the daemon via an encrypted gRPC channel over Unix Domain Sockets.
+- **Rule Manager:** Interfaces with the **SQLCipher** encrypted SQLite database.
+- **Sysbar Gadget:** A background-resident system tray icon for real-time notifications.
 
-### 3. Iced UI (`ui/`)
-*   **Role:** The graphical user interface for real-time monitoring and rule management.
-*   **Framework:** Built using the `iced` native Rust GUI library.
-*   **IPC Client:** Communicates with the daemon via an encrypted gRPC channel over Unix Domain Sockets.
-*   **System Tray (Sysbar):** Provides a background resident icon for quick status checks and dashboard access.
+### 3. DNS Protector
+A built-in proxy that intercepts local DNS requests and upgrades them to **DNS-over-HTTPS (DoH)**, ensuring that filtering remains effective even against applications attempting to bypass local DNS.
 
-### 4. Security Layer
-*   **Database Encryption:** Uses SQLCipher to protect rules and logs at rest.
-*   **Parameterized Queries:** Eliminates SQL Injection risks identified in the legacy Python implementation.
-*   **Memory Safety:** The entire user-space stack is implemented in Rust, removing common C/C++ memory vulnerabilities.
+## 🔒 Security Hardening Data Flow
+1.  **Binary Execution:** eBPF captures the `execve` event and computes the **SHA-256 hash** of the binary on disk.
+2.  **Network Request:** NFQ holds the packet.
+3.  **Contextual Lookup:** The daemon fetches the process lineage (PPID chain) and maps it to the intercepted connection.
+4.  **Enclave Validation:** The rules engine (inside the Litebox enclave) matches the Connection + Hash + Parent Process against the policy.
+5.  **Final Verdict:** Packet is released or dropped based on the result.
 
-## Data Flow
-1.  **Event Capture:** eBPF detects a process making a connection.
-2.  **Interception:** NFQUEUE holds the packet.
-3.  **Process Identification:** Daemon maps the network event to a process name and path via `/proc`.
-4.  **Policy Lookup:** Daemon checks the encrypted rules database.
-5.  **User Interaction (Optional):** If no rule exists, an IPC request is sent to the UI to display a prompt.
-6.  **Verdict:** The daemon sends an `ACCEPT` or `DROP` verdict to NFQUEUE.
+## 🛠️ Cross-Platform Strategy
+SecureSnitch uses a trait-based backend abstraction (`backend.rs`).
+- **Linux:** Uses native Netfilter and eBPF.
+- **macOS/Windows:** Uses a generic `sysinfo` process tracker with experimental platform-specific interception hooks.

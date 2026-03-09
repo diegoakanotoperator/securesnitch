@@ -1,4 +1,4 @@
-# Security Analysis Report - OpenSnitch
+# Security Analysis Report - SecureSnitch
 
 **Date:** March 9, 2026
 **Scope:** Go Daemon, Python UI, and C eBPF programs.
@@ -8,20 +8,20 @@
 
 ## 1. Executive Summary
 
-The security analysis of the OpenSnitch codebase found no evidence of intentional implants, backdoors, or malicious telemetry. The application logic is consistent with its stated purpose as a host-based application firewall. However, a **High Severity SQL Injection** vulnerability was identified in the Python UI's database handling, and a **Medium Severity** risk was noted in the Go daemon's centralized command execution wrapper.
+The security analysis of the SecureSnitch codebase found no evidence of intentional implants, backdoors, or malicious telemetry. The application logic is consistent with its stated purpose as a host-based application firewall. However, a **High Severity SQL Injection** vulnerability was identified in the Python UI's database handling, and a **Medium Severity** risk was noted in the Go daemon's centralized command execution wrapper.
 
 ## 2. Findings
 
 ### 2.1 SQL Injection in Python UI (High Severity)
-The Python UI uses `PyQt6.QtSql` for database operations. Several methods in `ui/opensnitch/database/__init__.py` (notably `update_batch`) construct SQL queries using Python string formatting (`%` or `.format()`) instead of parameterized queries (bind values).
+The Python UI uses `PyQt6.QtSql` for database operations. Several methods in `ui/securesnitch/database/__init__.py` (notably `update_batch`) construct SQL queries using Python string formatting (`%` or `.format()`) instead of parameterized queries (bind values).
 
-*   **Vulnerable Code:** `ui/opensnitch/database/__init__.py`, `update_batch` method.
+*   **Vulnerable Code:** `ui/securesnitch/database/__init__.py`, `update_batch` method.
 *   **Vector:** A malicious process can craft its own path, arguments, or hostname to include SQL injection payloads. For example, a process path containing double quotes could break out of the `WHERE` clause:
     ```python
     s = "UPDATE " + table + " SET " + "%s=(select hits from %s)+%s" % (db_fields[1], table, values[idx])
     s += "  WHERE %s=\"%s\"," % (db_fields[0], fields[idx])
     ```
-*   **Impact:** Arbitrary SQL execution against the `opensnitch.db`, potentially allowing an attacker to modify rules, delete logs, or bypass security settings stored in the database.
+*   **Impact:** Arbitrary SQL execution against the `securesnitch.db`, potentially allowing an attacker to modify rules, delete logs, or bypass security settings stored in the database.
 
 ### 2.2 Command Execution Wrapper Risk (Medium Severity)
 The Go daemon implements a centralized command execution wrapper in `daemon/core/core.go`.
@@ -45,7 +45,7 @@ The Go daemon implements a centralized command execution wrapper in `daemon/core
 
 ## 4. Recommendations
 
-1.  **Remediate SQL Injection:** Refactor `ui/opensnitch/database/__init__.py` to use `QSqlQuery.prepare()` and `bindValue()` for all queries involving external data (process paths, hostnames, etc.).
+1.  **Remediate SQL Injection:** Refactor `ui/securesnitch/database/__init__.py` to use `QSqlQuery.prepare()` and `bindValue()` for all queries involving external data (process paths, hostnames, etc.).
 2.  **Audit `core.Exec` Callers:** Ensure that any new functionality using the `Exec` wrapper strictly validates or sanitizes its arguments.
 3.  **Use Parameterized Shell Commands:** Where possible, avoid raw shell execution and use specialized libraries for system configuration (e.g., netlink for firewall rules instead of `iptables` CLI).
 

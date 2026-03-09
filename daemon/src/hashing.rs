@@ -16,3 +16,7 @@ pub fn calculate_sha256<P: AsRef<Path>>(path: P) -> io::Result<String> {
 
     Ok(format!("{:x}", hasher.finalize()))
 }
+
+#[cfg(test)]
+#[path = "hashing_test.rs"]
+mod tests;

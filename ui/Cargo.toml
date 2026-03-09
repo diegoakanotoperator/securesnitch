@@ -10,7 +10,7 @@ prost = "0.13.5"
 sqlx = { version = "0.8.6", features = ["sqlite", "runtime-tokio"] }
 tokio = "1.50.0"
 tonic = "0.12.3"
-tray-icon = "0.21.3"
+tray-icon = { version = "0.21.3", default-features = false }
 
 [build-dependencies]
 tonic-build = { version = "0.12.3", features = ["transport"] }

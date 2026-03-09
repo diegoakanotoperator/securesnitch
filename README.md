@@ -1,35 +1,61 @@
-# SecureSnitch
+# 🛡️ SecureSnitch
 
-SecureSnitch is a high-performance, memory-safe, and hardened host-based application firewall for Linux, originally forked from [evilsocket/opensnitch](https://github.com/evilsocket/opensnitch).
+**The Fortified, Memory-Safe Application Firewall for the Modern Desktop.**
 
-The project has been completely refactored from Go and Python into a unified Rust architecture, integrating **Litebox** memory enclaves and **SQLCipher** for data-at-rest encryption.
+SecureSnitch is a next-generation, host-based application firewall for Linux, macOS, and Windows. Originally forked from the pioneering [OpenSnitch](https://github.com/evilsocket/opensnitch) project, SecureSnitch has been completely rebuilt from the ground up in **Rust** to provide uncompromising performance, memory safety, and advanced anti-tampering protections.
 
-## Features
-- **Fail-Closed Security:** Prevents network leaks before the firewall rules are loaded.
-- **eBPF-Powered Monitoring:** High-performance kernel-level tracking of system events.
-- **Advanced Rules Engine:** Support for complex nested conditions (Regex, CIDR, numeric ranges).
-- **Anti-Tampering:** Memory protection for the rules engine using the Litebox enclave.
-- **Modern Iced GUI:** A fast, native Rust dashboard and system tray icon.
+---
 
-## Prerequisites
+## 🚀 Mission
+Our mission is to provide users with absolute transparency and control over their system's network activity while ensuring the firewall itself is as resilient as the kernel it protects.
+
+## 💎 Key Pillars
+
+### 🛡️ Hardened Security
+- **Litebox Enclaves:** Core policy logic is isolated in a secure memory enclave to prevent in-memory tampering and process injection.
+- **Binary Integrity:** Every rule is tied to a unique SHA-256 binary hash. If a trusted application is modified or replaced, SecureSnitch detects it instantly.
+- **Fail-Closed Boot:** Our "Gatekeeper" strategy ensures zero network leaks during the boot process by redirecting traffic to NFQUEUE before the network stack is fully active.
+
+### 🦀 Rust Powered
+- **Memory Safety:** Elimination of buffer overflows, use-after-free, and other memory-class vulnerabilities common in C/C++ implementations.
+- **eBPF Integration:** High-performance, pure-Rust kernel monitoring via the `aya` crate.
+- **Native Speed:** Minimal CPU and memory overhead, even under heavy network load.
+
+### 🌐 Privacy First
+- **Encrypted Storage:** Rules and logs are secured at rest using **SQLCipher** (AES-256).
+- **Encrypted DNS:** A built-in **DNS-over-HTTPS (DoH)** proxy prevents DNS hijacking and protects your browsing metadata from local ISP snooping.
+
+---
+
+## 📦 Supported Platforms
+- **Linux:** Full eBPF + NFQUEUE support (x86_64).
+- **macOS:** Intel & Apple Silicon support (Build stable, Backend experimental).
+- **Windows:** x86_64 support (Build stable, Backend experimental).
+
+## 🛠️ Quick Start
+
+### Prerequisites
 - Rust (latest stable)
-- Linux Kernel with eBPF and NFQUEUE support.
-- `pkg-config`, `libdbus-1-dev`, `libgtk-3-dev` (for UI and system tray).
+- Linux: `libdbus-1-dev`, `libgtk-3-dev`, `pkg-config`, `libxdo-dev` (optional)
 
-## Building
+### Build
 ```bash
 cargo build --release
 ```
 
-## Running
-1. Start the daemon as root:
-   ```bash
-   sudo ./target/release/daemon
-   ```
-2. Start the UI:
-   ```bash
-   ./target/release/ui
-   ```
+### Run
+```bash
+# Start the hardened daemon
+sudo ./target/release/daemon
 
-## Security Posture
-SecureSnitch remediates several vulnerabilities found in the legacy codebase (notably SQL Injection and OS Command Injection) by utilizing Rust's memory safety and strictly parameterized queries. See `docs/testing_and_pentest_report.md` for more details.
+# Start the Iced-based UI
+./target/release/ui
+```
+
+---
+
+## 🤝 Community & Collaboration
+SecureSnitch is an open-source project. We welcome contributions that align with our pillars of security, performance, and privacy. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 📜 Acknowledgements
+SecureSnitch is a modernized fork of [evilsocket/opensnitch](https://github.com/evilsocket/opensnitch). We are grateful to the original authors for their vision and community groundwork.
